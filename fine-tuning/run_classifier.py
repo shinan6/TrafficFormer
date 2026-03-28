@@ -295,6 +295,8 @@ def main():
                         help="Path to id_to_label.json for human-readable metric names.")
     parser.add_argument("--tb_log_dir", type=str, default=None,
                         help="If set, write TensorBoard logs to this directory.")
+    parser.add_argument("--labels_num_override", type=int, default=None,
+                        help="If set, use this as the number of labels instead of counting from train data.")
 
     args = parser.parse_args()
 
@@ -309,7 +311,9 @@ def main():
         tb_writer = SummaryWriter(log_dir=args.tb_log_dir)
 
     # Count the number of labels.
-    if args.train_path is None:
+    if args.labels_num_override is not None:
+        args.labels_num = args.labels_num_override
+    elif args.train_path is None:
         args.labels_num = 197
     else:
         args.labels_num = count_labels_num(args.train_path)

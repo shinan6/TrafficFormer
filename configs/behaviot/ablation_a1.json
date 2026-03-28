@@ -1,0 +1,22 @@
+{
+  "manifest_csv": "/mnt/data/behavoiot/pcap_vs_label.csv",
+  "device_macs_path": "/mnt/data/behavoiot/device_behaviot.txt",
+  "n_folds": 5,
+  "results_root": "results/behaviot_ablation",
+  "generated_dataset_root": "generated/behaviot_ablation",
+  "pretrained_model_zip": "/home/shinanliu/pre-trained_model.bin.zip",
+  "pretrained_model_path": "models/pretrained/pre-trained_model.bin",
+  "vocab_path": "models/encryptd_vocab.txt",
+  "payload_length": 64,
+  "start_index": 76,
+  "learning_rate": 6e-05,
+  "epochs_num": 4,
+  "earlystop": 4,
+  "seed": 42,
+  "max_samples_per_class": null,
+  "min_samples_per_class": 5,
+  "config_path": "models/bert/base_config.json",
+  "seq_length": 512,
+  "batch_size": 32,
+  "class_weight_method": "none"
+}

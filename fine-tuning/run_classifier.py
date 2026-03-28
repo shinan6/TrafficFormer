@@ -33,6 +33,7 @@ class Classifier(nn.Module):
         self.soft_alpha = args.soft_alpha
         self.output_layer_1 = nn.Linear(args.hidden_size, args.hidden_size)
         self.output_layer_2 = nn.Linear(args.hidden_size, self.labels_num)
+        self.class_weights = getattr(args, 'class_weights', None)
 
     def forward(self, src, tgt, seg, soft_tgt=None):
         """
@@ -58,11 +59,12 @@ class Classifier(nn.Module):
         output = torch.tanh(self.output_layer_1(output))
         logits = self.output_layer_2(output)
         if tgt is not None:
+            nll_weight = self.class_weights.to(logits.device) if self.class_weights is not None else None
             if self.soft_targets and soft_tgt is not None:
                 loss = self.soft_alpha * nn.MSELoss()(logits, soft_tgt) + \
-                       (1 - self.soft_alpha) * nn.NLLLoss()(nn.LogSoftmax(dim=-1)(logits), tgt.view(-1))
+                       (1 - self.soft_alpha) * nn.NLLLoss(weight=nll_weight)(nn.LogSoftmax(dim=-1)(logits), tgt.view(-1))
             else:
-                loss = nn.NLLLoss()(nn.LogSoftmax(dim=-1)(logits), tgt.view(-1))
+                loss = nn.NLLLoss(weight=nll_weight)(nn.LogSoftmax(dim=-1)(logits), tgt.view(-1))
             return loss, logits
         else:
             return None, logits
@@ -86,7 +88,22 @@ def count_labels_num(path):
 def load_or_initialize_parameters(args, model):
     if args.pretrained_model_path is not None:
         print("Initialize with pretrained model.")
-        model.load_state_dict(torch.load(args.pretrained_model_path, map_location={'cuda:1':'cuda:0', 'cuda:2':'cuda:0', 'cuda:3':'cuda:0'}), strict=False)
+        pretrained_state = torch.load(args.pretrained_model_path,
+                                       map_location={'cuda:1':'cuda:0', 'cuda:2':'cuda:0', 'cuda:3':'cuda:0'})
+        model_state = model.state_dict()
+        # Handle position embedding expansion (e.g., 512 -> 1024)
+        for key in list(pretrained_state.keys()):
+            if "position_embedding" in key and key in model_state:
+                pretrained_size = pretrained_state[key].shape[0]
+                model_size = model_state[key].shape[0]
+                if pretrained_size < model_size:
+                    print(f"Expanding {key}: {pretrained_size} -> {model_size} "
+                          f"(copying {pretrained_size}, random init {model_size - pretrained_size})")
+                    expanded = torch.zeros_like(model_state[key])
+                    expanded.normal_(0, 0.02)
+                    expanded[:pretrained_size] = pretrained_state[key]
+                    pretrained_state[key] = expanded
+        model.load_state_dict(pretrained_state, strict=False)
     else:
         print("Initialize with normal distribution.")
         for n, p in list(model.named_parameters()):
@@ -297,6 +314,8 @@ def main():
                         help="If set, write TensorBoard logs to this directory.")
     parser.add_argument("--labels_num_override", type=int, default=None,
                         help="If set, use this as the number of labels instead of counting from train data.")
+    parser.add_argument("--class_weights_path", type=str, default=None,
+                        help="Path to JSON file with class weight list for weighted NLLLoss.")
 
     args = parser.parse_args()
 
@@ -317,6 +336,15 @@ def main():
         args.labels_num = 197
     else:
         args.labels_num = count_labels_num(args.train_path)
+
+    # Load class weights if provided
+    args.class_weights = None
+    if args.class_weights_path:
+        import json as _json
+        from pathlib import Path as _Path
+        weights_list = _json.loads(_Path(args.class_weights_path).read_text())
+        args.class_weights = torch.FloatTensor(weights_list)
+        print(f"Loaded class weights from {args.class_weights_path} ({len(weights_list)} classes)")
 
     # Build tokenizer.
     args.tokenizer = str2tokenizer[args.tokenizer](args)

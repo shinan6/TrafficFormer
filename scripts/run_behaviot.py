@@ -11,6 +11,7 @@ import os
 import subprocess
 import sys
 import zipfile
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
@@ -19,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from data_generation.behaviot_data_gen import (
     load_config, load_manifest, build_label_map,
     extract_all_features, build_kfold_splits, write_fold_tsvs,
-    cap_samples_per_class,
+    cap_samples_per_class, load_device_macs, compute_class_weights,
 )
 from uer.reporting_utils import aggregate_fold_metrics
 
@@ -128,8 +129,15 @@ def main():
     rows = load_manifest(config["manifest_csv"])
     print(f"Loaded {len(rows)} manifest rows")
 
+    # Load device MACs if configured
+    device_macs = None
+    if config.get("device_macs_path"):
+        device_macs = load_device_macs(config["device_macs_path"])
+        print(f"Loaded {len(device_macs)} device MAC addresses (MAC-filtered extraction)")
+
     cache_dir = Path(config["generated_dataset_root"]) / "cache"
-    features, skipped = extract_all_features(rows, config, cache_dir=str(cache_dir))
+    features, skipped = extract_all_features(rows, config, cache_dir=str(cache_dir),
+                                              device_macs=device_macs)
 
     extractable_rows = [r for r in rows if r["pcap_path"] in features]
     print(f"Extractable samples: {len(extractable_rows)} / {len(rows)}")
@@ -178,10 +186,29 @@ def main():
             fold_results_dir = run_dir / f"fold_{fold_idx}"
             fold_results_dir.mkdir(parents=True, exist_ok=True)
             tb_log_dir = run_dir / "tb_logs" / f"fold_{fold_idx}"
+
+            # Compute and save class weights if configured
+            class_weights_path = None
+            weight_method = config.get("class_weight_method", "none")
+            if weight_method != "none":
+                train_rows = fold_splits[0]
+                train_counts = Counter(
+                    r[target] for r in train_rows if r["pcap_path"] in features
+                )
+                weights = compute_class_weights(
+                    {k: train_counts.get(k, 0) for k in sorted(label_to_id.keys())},
+                    method=weight_method,
+                )
+                class_weights_path = fold_results_dir / "class_weights.json"
+                class_weights_path.write_text(json.dumps(weights, indent=2))
+                print(f"  Class weights ({weight_method}): min={min(weights):.3f} max={max(weights):.3f}")
+
             cmd = build_classifier_command(
                 config, str(data_dir), str(fold_results_dir),
                 pretrained_path, str(id_to_label_path), str(tb_log_dir),
             )
+            if class_weights_path:
+                cmd.extend(["--class_weights_path", str(class_weights_path)])
 
             log_file.write(f"\n{'='*60}\nFold {fold_idx}\n{'='*60}\n")
             log_file.write(f"Command: {' '.join(cmd)}\n\n")

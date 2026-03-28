@@ -2,6 +2,7 @@
 
 import csv
 import json
+import math
 import random
 from collections import Counter
 from pathlib import Path
@@ -90,14 +91,125 @@ def _extract_single_pcap(args):
         return pcap_path, None, str(e)
 
 
-def extract_all_features(manifest_rows, config, cache_dir=None, n_workers=32):
-    """Extract bigram features from all pcaps with multiprocessing and caching.
+def load_device_macs(metadata_path):
+    """Load device MAC addresses from device_behaviot.txt.
+
+    File format: device_name mac_address manufacturer (space-separated)
+    Returns: dict mapping device_label to lowercase MAC address.
+    """
+    macs = {}
+    with open(metadata_path) as f:
+        for line in f:
+            parts = line.strip().split()
+            if len(parts) >= 2:
+                macs[parts[0]] = parts[1].lower()
+    return macs
+
+
+def _extract_by_device_mac(args):
+    """Extract bigram features from packets matching a device MAC address.
+
+    Bypasses flowcontainer entirely — reads pcap with scapy, filters to IP
+    packets involving the device MAC, anonymizes, and converts to bigrams.
+    No minimum packet count; short samples are padded by the tokenizer.
+    """
+    pcap_path, payload_length, start_index, device_mac = args
+    try:
+        import binascii
+        import os
+        import sys
+        import scapy.all as scapy_mod
+
+        data_gen_dir = os.path.dirname(os.path.abspath(__file__))
+        if data_gen_dir not in sys.path:
+            sys.path.insert(0, data_gen_dir)
+
+        packets = scapy_mod.rdpcap(pcap_path)
+        device_mac = device_mac.lower()
+
+        # Filter to IP packets involving the device MAC
+        device_packets = scapy_mod.PacketList([
+            p for p in packets
+            if scapy_mod.IP in p and scapy_mod.Ether in p
+            and (p[scapy_mod.Ether].src.lower() == device_mac
+                 or p[scapy_mod.Ether].dst.lower() == device_mac)
+        ])
+
+        if len(device_packets) == 0:
+            return pcap_path, None, "no_matching_packets"
+
+        from data_generation.finetuning_data_gen import random_ip_port, random_tls_randomtime
+        from utils import bigram_generation
+
+        # Anonymize
+        device_packets = random_ip_port(device_packets)
+        if device_packets == -1:
+            return pcap_path, None, "anonymization_failed"
+        device_packets = random_tls_randomtime(device_packets)
+
+        # Convert to bigrams
+        flow_data_string = ""
+        No_ether = not hasattr(device_packets[0], "type")
+
+        for packet in device_packets:
+            packet_data = packet.copy()
+            data = binascii.hexlify(bytes(packet_data))
+            if No_ether:
+                packet_string = data.decode()
+                packet_string = "c49a025996f8e46f13e2e3ae0800" + packet_string
+                packet_string = packet_string[start_index:start_index + 2 * payload_length]
+            else:
+                packet_string = data.decode()[start_index:start_index + 2 * payload_length]
+
+            flow_data_string += "[SEP] "
+            flow_data_string += bigram_generation(
+                packet_string.strip(),
+                token_len=len(packet_string.strip()),
+                flag=True,
+            )
+
+        return pcap_path, flow_data_string, None
+    except Exception as e:
+        return pcap_path, None, str(e)
+
+
+def compute_class_weights(class_counts, method="inverse_sqrt"):
+    """Compute class weights for weighted NLLLoss.
 
     Args:
-        manifest_rows: List of dicts with 'pcap_path' key.
+        class_counts: dict mapping class_name to sample count
+        method: "inverse_sqrt" or "none"
+
+    Returns:
+        List of float weights ordered by sorted class name, or None if method="none".
+    """
+    if method == "none":
+        return None
+    n_total = sum(class_counts.values())
+    n_classes = len(class_counts)
+    weights = []
+    for label in sorted(class_counts.keys()):
+        n_c = class_counts[label]
+        if method == "inverse_sqrt":
+            weights.append(math.sqrt(n_total / (n_classes * n_c)))
+        else:
+            raise ValueError(f"Unknown weighting method: {method}")
+    return weights
+
+
+def extract_all_features(manifest_rows, config, cache_dir=None, n_workers=32,
+                         device_macs=None):
+    """Extract bigram features from all pcaps with multiprocessing and caching.
+
+    If device_macs is provided, uses MAC-filtered single-device extraction
+    (bypasses flowcontainer). Otherwise uses the legacy all-flows extraction.
+
+    Args:
+        manifest_rows: List of dicts with 'pcap_path' and optionally 'device_label'.
         config: Dict with 'payload_length', 'start_index'.
         cache_dir: If set, cache extracted features to this directory.
         n_workers: Number of parallel workers (1 = serial, for testing).
+        device_macs: Optional dict mapping device_label to MAC address.
 
     Returns:
         (features_dict, skipped_list) where features_dict maps pcap_path to
@@ -106,10 +218,12 @@ def extract_all_features(manifest_rows, config, cache_dir=None, n_workers=32):
     # Build a cache key from extraction parameters + manifest content to detect stale caches
     import hashlib
     pcap_paths = sorted(r["pcap_path"] for r in manifest_rows)
+    extraction_mode = "mac_filtered" if device_macs else "all_flows"
     cache_key = hashlib.md5(json.dumps({
         "pcap_paths": pcap_paths,
         "payload_length": config["payload_length"],
         "start_index": config["start_index"],
+        "extraction_mode": extraction_mode,
     }, sort_keys=True).encode()).hexdigest()[:16]
 
     if cache_dir:
@@ -131,10 +245,19 @@ def extract_all_features(manifest_rows, config, cache_dir=None, n_workers=32):
             else:
                 print(f"Cache key mismatch (config or manifest changed). Re-extracting.")
 
-    args_list = [
-        (r["pcap_path"], config["payload_length"], config["start_index"])
-        for r in manifest_rows
-    ]
+    if device_macs:
+        args_list = [
+            (r["pcap_path"], config["payload_length"], config["start_index"],
+             device_macs.get(r.get("device_label", ""), ""))
+            for r in manifest_rows
+        ]
+        extract_fn = _extract_by_device_mac
+    else:
+        args_list = [
+            (r["pcap_path"], config["payload_length"], config["start_index"])
+            for r in manifest_rows
+        ]
+        extract_fn = _extract_single_pcap
 
     features = {}
     skipped = []
@@ -142,14 +265,14 @@ def extract_all_features(manifest_rows, config, cache_dir=None, n_workers=32):
     if n_workers > 1 and len(args_list) > 1:
         from multiprocessing import Pool
         with Pool(min(n_workers, len(args_list))) as pool:
-            for pcap_path, datagram, error in pool.imap_unordered(_extract_single_pcap, args_list):
+            for pcap_path, datagram, error in pool.imap_unordered(extract_fn, args_list):
                 if error:
                     skipped.append({"pcap_path": pcap_path, "reason": error})
                 else:
                     features[pcap_path] = datagram
     else:
         for a in args_list:
-            pcap_path, datagram, error = _extract_single_pcap(a)
+            pcap_path, datagram, error = extract_fn(a)
             if error:
                 skipped.append({"pcap_path": pcap_path, "reason": error})
             else:

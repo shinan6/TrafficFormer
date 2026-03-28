@@ -15,8 +15,8 @@
   "seed": 42,
   "max_samples_per_class": null,
   "min_samples_per_class": 5,
-  "config_path": "models/bert/base_config.json",
-  "seq_length": 512,
-  "batch_size": 32,
+  "config_path": "models/bert/base_config_1024.json",
+  "seq_length": 1024,
+  "batch_size": 16,
   "class_weight_method": "inverse_sqrt"
 }

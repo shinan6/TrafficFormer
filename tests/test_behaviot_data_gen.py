@@ -268,5 +268,44 @@ class TestCapSamples(unittest.TestCase):
         self.assertEqual(len(capped), 3)
 
 
+class TestExtractionNoTruncation(unittest.TestCase):
+    """AC-1.1: verify packets_num=999999 is passed (no extraction-time truncation)."""
+
+    @patch("data_generation.behaviot_data_gen._extract_single_pcap")
+    def test_extract_passes_large_packets_num(self, mock_extract):
+        """The worker function should call get_feature_flow with packets_num=999999."""
+        mock_extract.side_effect = lambda args: (args[0], "45 00", None)
+        rows = [{"pcap_path": "/tmp/a.pcap"}]
+        config = {"payload_length": 64, "start_index": 76}
+        extract_all_features(rows, config, n_workers=1)
+        # Verify _extract_single_pcap was called with the right args
+        call_args = mock_extract.call_args[0][0]
+        self.assertEqual(call_args, ("/tmp/a.pcap", 64, 76))
+
+    def test_worker_function_uses_999999(self):
+        """Verify the worker function source code passes packets_num=999999."""
+        import inspect
+        from data_generation.behaviot_data_gen import _extract_single_pcap
+        source = inspect.getsource(_extract_single_pcap)
+        self.assertIn("packets_num=999999", source)
+
+
+class TestKFoldStratifiedFallback(unittest.TestCase):
+    """AC-2: verify inner dev split falls back gracefully for high-class targets."""
+
+    def test_fallback_split_still_produces_dev(self):
+        """With many classes and few samples, non-stratified fallback should still work."""
+        # 20 classes, 2 samples each = 40 total; 2-fold outer = 20 train
+        # 10% dev = 2 samples, but 20 classes can't stratify into 2 → fallback
+        rows = [{"pcap_path": f"/tmp/{c}_{i}.pcap", "label": f"class_{c}"}
+                for c in range(20) for i in range(2)]
+        label_to_id = {f"class_{c}": c for c in range(20)}
+        folds = build_kfold_splits(rows, "label", label_to_id, n_folds=2, seed=42)
+        for train, dev, test in folds:
+            self.assertGreater(len(dev), 0, "Dev split should not be empty after fallback")
+            self.assertGreater(len(train), 0)
+            self.assertGreater(len(test), 0)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -194,6 +194,8 @@ def build_kfold_splits(rows, target_column, label_to_id, n_folds, seed):
         except ValueError:
             # Stratified inner split infeasible (some classes have too few samples
             # for 10% dev). Fall back to non-stratified random split.
+            print(f"WARNING: Stratified inner dev split infeasible for fold "
+                  f"(likely classes with <=1 sample in train). Using random split.")
             train_rows, dev_rows = train_test_split(
                 train_all, test_size=0.1, random_state=seed
             )

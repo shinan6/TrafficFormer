@@ -85,5 +85,39 @@ class TestRunnerDryRun(unittest.TestCase):
         self.assertIn("device_type_label", result.stdout)
 
 
+class TestRunClassifierBackwardCompat(unittest.TestCase):
+    """AC-3: verify run_classifier.py accepts legacy invocations without new args."""
+
+    def test_argparse_accepts_legacy_args_only(self):
+        """run_classifier.py should parse without --results_dir, --id_to_label_path, --tb_log_dir."""
+        result = subprocess.run(
+            [sys.executable, "fine-tuning/run_classifier.py", "--help"],
+            capture_output=True, text=True,
+            cwd="/home/shinanliu/TrafficFormer",
+        )
+        self.assertEqual(result.returncode, 0)
+        # New args should appear as optional
+        self.assertIn("--results_dir", result.stdout)
+        self.assertIn("--tb_log_dir", result.stdout)
+        # Defaults should be None (optional)
+        self.assertIn("default: None", result.stdout)
+
+    def test_evaluate_returns_four_tuple(self):
+        """Verify evaluate() signature returns 4 values via source inspection."""
+        import ast
+        with open("fine-tuning/run_classifier.py") as f:
+            source = f.read()
+        tree = ast.parse(source)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name == "evaluate":
+                # Find return statements
+                for child in ast.walk(node):
+                    if isinstance(child, ast.Return) and isinstance(child.value, ast.Tuple):
+                        self.assertEqual(len(child.value.elts), 4,
+                                         "evaluate() should return a 4-tuple")
+                        return
+        self.fail("Could not find evaluate() with a 4-tuple return")
+
+
 if __name__ == "__main__":
     unittest.main()

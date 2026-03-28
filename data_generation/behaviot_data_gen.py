@@ -201,11 +201,16 @@ def build_kfold_splits(rows, target_column, label_to_id, n_folds, seed):
     return folds
 
 
-def write_fold_tsvs(fold_splits, features, label_to_id, target_column, output_dir):
+def write_fold_tsvs(fold_splits, features, label_to_id, target_column, output_dir,
+                    max_tokens=None):
     """Write train/valid/test TSV files for one fold.
 
     TSV format matches run_classifier.py: header 'label\\ttext_a',
     then one row per sample with numeric label and bigram datagram string.
+
+    If max_tokens is set, truncate each datagram string to approximately that many
+    space-separated tokens. This avoids slow tokenization when seq_length << full
+    datagram length. The full strings remain in the feature cache for optionality.
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -217,7 +222,14 @@ def write_fold_tsvs(fold_splits, features, label_to_id, target_column, output_di
                 if r["pcap_path"] not in features:
                     continue
                 label_id = label_to_id[r[target_column]]
-                f.write(f"{label_id}\t{features[r['pcap_path']]}\n")
+                datagram = features[r["pcap_path"]]
+                if max_tokens and datagram:
+                    # Truncate to ~max_tokens space-separated tokens
+                    # Each token is ~5 chars ("XX "), so max_tokens*5 chars is a safe cutoff
+                    char_limit = max_tokens * 5
+                    if len(datagram) > char_limit:
+                        datagram = datagram[:char_limit].rsplit(" ", 1)[0]
+                f.write(f"{label_id}\t{datagram}\n")
 
 
 def cap_samples_per_class(rows, target_column, label_to_id, max_per_class, seed=42):

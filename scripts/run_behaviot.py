@@ -168,7 +168,8 @@ def main():
             print(f"{'='*60}")
 
             data_dir = Path(config["generated_dataset_root"]) / target / f"fold_{fold_idx}"
-            write_fold_tsvs(fold_splits, features, label_to_id, target, str(data_dir))
+            write_fold_tsvs(fold_splits, features, label_to_id, target, str(data_dir),
+                            max_tokens=config["seq_length"])
             train_count = sum(1 for _ in open(data_dir / "train_dataset.tsv")) - 1
             test_count = sum(1 for _ in open(data_dir / "test_dataset.tsv")) - 1
             print(f"  Train: {train_count}, Test: {test_count}")

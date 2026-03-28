@@ -1,4 +1,15 @@
 __pycache__/
 *.pyc
+
+# Generated data (feature cache, per-fold TSVs)
+generated/
+
+# Pretrained and fine-tuned models
+models/pretrained/
+**/finetuned_model.bin
+
+# Experiment results
 results/
+
+# Humanize loop state
 .humanize/

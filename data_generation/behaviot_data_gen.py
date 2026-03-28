@@ -73,12 +73,15 @@ def _extract_single_pcap(args):
         # Write filtered pcap to temp file for get_feature_flow
         with tempfile.NamedTemporaryFile(suffix=".pcap", delete=False) as tmp:
             tmp_path = tmp.name
-        scapy_mod.wrpcap(tmp_path, ip_packets)
+        try:
+            scapy_mod.wrpcap(tmp_path, ip_packets)
 
-        from data_generation.finetuning_data_gen import get_feature_flow
-        result = get_feature_flow(tmp_path, payload_length, packets_num=999999,
-                                  start_index=start_index)
-        os.unlink(tmp_path)
+            from data_generation.finetuning_data_gen import get_feature_flow
+            result = get_feature_flow(tmp_path, payload_length, packets_num=999999,
+                                      start_index=start_index)
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
 
         if result == -1:
             return pcap_path, None, "extraction_returned_-1"
@@ -100,19 +103,33 @@ def extract_all_features(manifest_rows, config, cache_dir=None, n_workers=32):
         (features_dict, skipped_list) where features_dict maps pcap_path to
         datagram string and skipped_list contains dicts with pcap_path + reason.
     """
+    # Build a cache key from extraction parameters to detect stale caches
+    import hashlib
+    cache_key = hashlib.md5(json.dumps({
+        "manifest_count": len(manifest_rows),
+        "payload_length": config["payload_length"],
+        "start_index": config["start_index"],
+        "manifest_csv": config.get("manifest_csv", ""),
+    }, sort_keys=True).encode()).hexdigest()[:12]
+
     if cache_dir:
         cache_dir = Path(cache_dir)
         cache_file = cache_dir / "features_cache.json"
+        cache_key_file = cache_dir / "cache_key.txt"
         skipped_file = cache_dir / "skipped_samples.csv"
         if cache_file.exists():
-            with open(cache_file) as f:
-                features = json.load(f)
-            skipped = []
-            if skipped_file.exists():
-                with open(skipped_file) as f:
-                    skipped = list(csv.DictReader(f))
-            print(f"Loaded {len(features)} cached features, {len(skipped)} previously skipped")
-            return features, skipped
+            stored_key = cache_key_file.read_text().strip() if cache_key_file.exists() else ""
+            if stored_key == cache_key:
+                with open(cache_file) as f:
+                    features = json.load(f)
+                skipped = []
+                if skipped_file.exists():
+                    with open(skipped_file) as f:
+                        skipped = list(csv.DictReader(f))
+                print(f"Loaded {len(features)} cached features, {len(skipped)} previously skipped")
+                return features, skipped
+            else:
+                print(f"Cache key mismatch (config or manifest changed). Re-extracting.")
 
     args_list = [
         (r["pcap_path"], config["payload_length"], config["start_index"])
@@ -144,6 +161,7 @@ def extract_all_features(manifest_rows, config, cache_dir=None, n_workers=32):
         cache_dir.mkdir(parents=True, exist_ok=True)
         with open(cache_file, "w") as f:
             json.dump(features, f)
+        cache_key_file.write_text(cache_key)
         if skipped:
             with open(skipped_file, "w", newline="") as f:
                 w = csv.DictWriter(f, fieldnames=["pcap_path", "reason"])

@@ -13,15 +13,16 @@ from sklearn.metrics import (
 
 def compute_metrics(y_true, y_pred, label_names):
     """Compute classification metrics including per-class report."""
+    all_labels = list(range(len(label_names)))
     return {
         "accuracy": float(accuracy_score(y_true, y_pred)),
-        "macro_precision": float(precision_score(y_true, y_pred, average="macro", zero_division=0)),
-        "macro_recall": float(recall_score(y_true, y_pred, average="macro", zero_division=0)),
-        "macro_f1": float(f1_score(y_true, y_pred, average="macro", zero_division=0)),
-        "weighted_f1": float(f1_score(y_true, y_pred, average="weighted", zero_division=0)),
+        "macro_precision": float(precision_score(y_true, y_pred, average="macro", zero_division=0, labels=all_labels)),
+        "macro_recall": float(recall_score(y_true, y_pred, average="macro", zero_division=0, labels=all_labels)),
+        "macro_f1": float(f1_score(y_true, y_pred, average="macro", zero_division=0, labels=all_labels)),
+        "weighted_f1": float(f1_score(y_true, y_pred, average="weighted", zero_division=0, labels=all_labels)),
         "per_class": classification_report(
             y_true, y_pred, target_names=label_names,
-            output_dict=True, zero_division=0,
+            labels=all_labels, output_dict=True, zero_division=0,
         ),
     }
 
@@ -34,7 +35,8 @@ def write_metrics_json(path, metrics):
 
 def write_confusion_matrix_csv(path, y_true, y_pred, label_names):
     """Write confusion matrix as CSV (rows=true, cols=predicted, sklearn convention)."""
-    cm = confusion_matrix(y_true, y_pred)
+    all_labels = list(range(len(label_names)))
+    cm = confusion_matrix(y_true, y_pred, labels=all_labels)
     with open(path, "w", newline="") as f:
         w = csv.writer(f)
         w.writerow([""] + label_names)

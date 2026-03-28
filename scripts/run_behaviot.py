@@ -201,20 +201,32 @@ def main():
                 fold_metrics.append(json.loads(metrics_path.read_text()))
                 print(f"  Fold {fold_idx} macro_f1: {fold_metrics[-1]['macro_f1']:.4f}")
 
+    n_expected = config["n_folds"]
+    n_succeeded = len(fold_metrics)
+
+    if n_succeeded < n_expected:
+        print(f"\nERROR: Only {n_succeeded}/{n_expected} folds succeeded. "
+              f"Check run.log for details.")
+
     if fold_metrics:
         aggregated = aggregate_fold_metrics(fold_metrics)
+        aggregated["folds_succeeded"] = n_succeeded
+        aggregated["folds_expected"] = n_expected
         (run_dir / "aggregated_metrics.json").write_text(json.dumps(aggregated, indent=2))
         print(f"\n{'='*60}")
-        print(f"AGGREGATED RESULTS ({len(fold_metrics)} folds)")
+        print(f"AGGREGATED RESULTS ({n_succeeded}/{n_expected} folds)")
         print(f"{'='*60}")
         for key in ["accuracy", "macro_f1", "weighted_f1"]:
             m = aggregated[key]
             print(f"  {key}: {m['mean']:.4f} +/- {m['std']:.4f}")
         print(f"\nTensorBoard: tensorboard --logdir {run_dir / 'tb_logs'}")
     else:
-        print("WARNING: No fold metrics collected. Check run.log for errors.")
+        print("ERROR: No fold metrics collected. Check run.log for errors.")
 
     print(f"\nAll results saved to: {run_dir}")
+
+    if n_succeeded < n_expected:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -332,7 +332,8 @@ def main():
 
     if args.train_path is None:
         args.model = model
-        args.labels_num = 197
+        if args.labels_num_override is None:
+            args.labels_num = 197
         print("No train data, only evaluate..")
         result = evaluate(args, read_dataset(args, args.dev_path))
         return

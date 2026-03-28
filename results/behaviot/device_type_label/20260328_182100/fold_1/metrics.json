@@ -1,0 +1,82 @@
+{
+  "accuracy": 0.9836206896551725,
+  "macro_precision": 0.9656509624131691,
+  "macro_recall": 0.9391877123972578,
+  "macro_f1": 0.9510930277928177,
+  "weighted_f1": 0.9835317873360807,
+  "per_class": {
+    "appliance": {
+      "precision": 0.8333333333333334,
+      "recall": 0.7142857142857143,
+      "f1-score": 0.7692307692307693,
+      "support": 7.0
+    },
+    "bulb": {
+      "precision": 0.9974554707379135,
+      "recall": 1.0,
+      "f1-score": 0.9987261146496815,
+      "support": 392.0
+    },
+    "camera": {
+      "precision": 0.9636363636363636,
+      "recall": 0.99375,
+      "f1-score": 0.9784615384615385,
+      "support": 160.0
+    },
+    "hub": {
+      "precision": 0.9811320754716981,
+      "recall": 0.9629629629629629,
+      "f1-score": 0.9719626168224299,
+      "support": 108.0
+    },
+    "light_strip": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 166.0
+    },
+    "plug": {
+      "precision": 0.9714285714285714,
+      "recall": 0.9577464788732394,
+      "f1-score": 0.9645390070921985,
+      "support": 71.0
+    },
+    "sensor": {
+      "precision": 1.0,
+      "recall": 0.9473684210526315,
+      "f1-score": 0.972972972972973,
+      "support": 38.0
+    },
+    "smart_display": {
+      "precision": 0.9166666666666666,
+      "recall": 1.0,
+      "f1-score": 0.9565217391304348,
+      "support": 66.0
+    },
+    "smart_door": {
+      "precision": 0.9928571428571429,
+      "recall": 0.9586206896551724,
+      "f1-score": 0.9754385964912281,
+      "support": 145.0
+    },
+    "smart_speaker": {
+      "precision": 1.0,
+      "recall": 0.8571428571428571,
+      "f1-score": 0.9230769230769231,
+      "support": 7.0
+    },
+    "accuracy": 0.9836206896551725,
+    "macro avg": {
+      "precision": 0.9656509624131691,
+      "recall": 0.9391877123972578,
+      "f1-score": 0.9510930277928177,
+      "support": 1160.0
+    },
+    "weighted avg": {
+      "precision": 0.9839790297250616,
+      "recall": 0.9836206896551725,
+      "f1-score": 0.9835317873360807,
+      "support": 1160.0
+    }
+  }
+}

@@ -8,8 +8,13 @@ generated/
 models/pretrained/
 **/finetuned_model.bin
 
-# Experiment results
-results/
+# Experiment results — ignore large files, keep metrics
+results/**/finetuned_model.bin
+results/**/predictions.tsv
+results/**/run.log
+results/**/tb_logs/
+results/**/environment.json
+results/**/resolved_config.json
 
 # Humanize loop state
 .humanize/

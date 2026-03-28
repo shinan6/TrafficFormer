@@ -1,0 +1,12 @@
+{
+  "appliance": 0,
+  "bulb": 1,
+  "camera": 2,
+  "hub": 3,
+  "light_strip": 4,
+  "plug": 5,
+  "sensor": 6,
+  "smart_display": 7,
+  "smart_door": 8,
+  "smart_speaker": 9
+}

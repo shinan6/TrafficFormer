@@ -1,0 +1,13 @@
+{
+  "audio": 0,
+  "brightness": 1,
+  "capture": 2,
+  "color": 3,
+  "idle": 4,
+  "off": 5,
+  "on": 6,
+  "routine": 7,
+  "setpoint": 8,
+  "volume": 9,
+  "watch": 10
+}

@@ -1,0 +1,238 @@
+{
+  "accuracy": 0.9835782195332757,
+  "macro_precision": 0.8992747664755305,
+  "macro_recall": 0.8982460576823321,
+  "macro_f1": 0.8985976708471202,
+  "weighted_f1": 0.9818473528613406,
+  "per_class": {
+    "amazon-plug": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 27.0
+    },
+    "aqara-hub": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 28.0
+    },
+    "brewer": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 1.0
+    },
+    "bulb1": {
+      "precision": 0.989010989010989,
+      "recall": 1.0,
+      "f1-score": 0.994475138121547,
+      "support": 90.0
+    },
+    "dlink-camera": {
+      "precision": 1.0,
+      "recall": 0.8888888888888888,
+      "f1-score": 0.9411764705882353,
+      "support": 9.0
+    },
+    "echoshow5": {
+      "precision": 0.9428571428571428,
+      "recall": 0.9166666666666666,
+      "f1-score": 0.9295774647887324,
+      "support": 36.0
+    },
+    "echospot": {
+      "precision": 0.9032258064516129,
+      "recall": 0.9333333333333333,
+      "f1-score": 0.9180327868852459,
+      "support": 30.0
+    },
+    "google-home-mini": {
+      "precision": 0.8333333333333334,
+      "recall": 0.8333333333333334,
+      "f1-score": 0.8333333333333334,
+      "support": 6.0
+    },
+    "gosund-bulb1": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 94.0
+    },
+    "govee-led1": {
+      "precision": 0.989247311827957,
+      "recall": 1.0,
+      "f1-score": 0.9945945945945946,
+      "support": 92.0
+    },
+    "icsee-doorbell": {
+      "precision": 1.0,
+      "recall": 0.9444444444444444,
+      "f1-score": 0.9714285714285714,
+      "support": 36.0
+    },
+    "ikea-hub": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 13.0
+    },
+    "ikettle": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3.0
+    },
+    "keyco-air": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1.0
+    },
+    "lefun-cam-wired": {
+      "precision": 0.9722222222222222,
+      "recall": 0.9722222222222222,
+      "f1-score": 0.9722222222222222,
+      "support": 36.0
+    },
+    "magichome-strip": {
+      "precision": 0.9868421052631579,
+      "recall": 1.0,
+      "f1-score": 0.9933774834437086,
+      "support": 75.0
+    },
+    "meross-dooropener": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 17.0
+    },
+    "microseven-camera": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 8.0
+    },
+    "nest-tstat": {
+      "precision": 0.972972972972973,
+      "recall": 1.0,
+      "f1-score": 0.9863013698630136,
+      "support": 36.0
+    },
+    "philips-bulb": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1.0
+    },
+    "ring-camera": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 41.0
+    },
+    "ring-chime1": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "ring-doorbell": {
+      "precision": 0.9487179487179487,
+      "recall": 0.925,
+      "f1-score": 0.9367088607594937,
+      "support": 40.0
+    },
+    "smartlife-bulb": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 120.0
+    },
+    "smartthings-hub": {
+      "precision": 0.9523809523809523,
+      "recall": 0.9523809523809523,
+      "f1-score": 0.9523809523809523,
+      "support": 21.0
+    },
+    "sousvide": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 1.0
+    },
+    "switchbot-hub": {
+      "precision": 0.9777777777777777,
+      "recall": 1.0,
+      "f1-score": 0.9887640449438202,
+      "support": 44.0
+    },
+    "t-wemo-plug": {
+      "precision": 0.9166666666666666,
+      "recall": 0.9705882352941176,
+      "f1-score": 0.9428571428571428,
+      "support": 34.0
+    },
+    "thermopro-sensor": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1.0
+    },
+    "tplink-bulb": {
+      "precision": 0.9886363636363636,
+      "recall": 1.0,
+      "f1-score": 0.9942857142857143,
+      "support": 87.0
+    },
+    "tplink-plug": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 10.0
+    },
+    "tuya-camera": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 21.0
+    },
+    "ubell-doorbell": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "wink-hub2": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1.0
+    },
+    "wyze-cam": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 23.0
+    },
+    "yi-camera": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 22.0
+    },
+    "accuracy": 0.9835782195332757,
+    "macro avg": {
+      "precision": 0.8992747664755305,
+      "recall": 0.8982460576823321,
+      "f1-score": 0.8985976708471202,
+      "support": 1157.0
+    },
+    "weighted avg": {
+      "precision": 0.9803375353770969,
+      "recall": 0.9835782195332757,
+      "f1-score": 0.9818473528613406,
+      "support": 1157.0
+    }
+  }
+}

@@ -1,0 +1,11 @@
+,appliance,bulb,camera,hub,light_strip,plug,sensor,smart_display,smart_door,smart_speaker
+appliance,2,0,0,2,0,0,1,1,0,0
+bulb,0,390,0,0,0,0,0,0,1,0
+camera,0,0,156,2,0,0,1,1,0,1
+hub,0,0,0,107,0,0,0,1,0,0
+light_strip,1,0,0,0,163,0,0,0,2,0
+plug,0,0,0,0,0,70,1,0,0,0
+sensor,0,0,0,0,0,0,38,0,0,0
+smart_display,0,0,1,1,0,1,1,61,0,0
+smart_door,0,0,0,0,0,0,0,0,145,1
+smart_speaker,0,0,2,0,0,0,0,2,0,3

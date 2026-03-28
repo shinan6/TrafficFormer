@@ -1,0 +1,334 @@
+{
+  "accuracy": 0.359792924935289,
+  "macro_precision": 0.326855907395276,
+  "macro_recall": 0.30625739139469194,
+  "macro_f1": 0.2953455201192875,
+  "weighted_f1": 0.3401207099348173,
+  "per_class": {
+    "alexa_close": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "alexa_color": {
+      "precision": 0.4,
+      "recall": 0.26666666666666666,
+      "f1-score": 0.32,
+      "support": 15.0
+    },
+    "alexa_color2": {
+      "precision": 0.2222222222222222,
+      "recall": 0.125,
+      "f1-score": 0.16,
+      "support": 16.0
+    },
+    "alexa_dim": {
+      "precision": 0.09090909090909091,
+      "recall": 0.10526315789473684,
+      "f1-score": 0.0975609756097561,
+      "support": 19.0
+    },
+    "alexa_dim2": {
+      "precision": 0.2631578947368421,
+      "recall": 0.2777777777777778,
+      "f1-score": 0.2702702702702703,
+      "support": 18.0
+    },
+    "alexa_off": {
+      "precision": 0.41935483870967744,
+      "recall": 0.325,
+      "f1-score": 0.36619718309859156,
+      "support": 40.0
+    },
+    "alexa_on": {
+      "precision": 0.47540983606557374,
+      "recall": 0.6304347826086957,
+      "f1-score": 0.5420560747663551,
+      "support": 46.0
+    },
+    "alexa_set": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "alexa_set2": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "alexa_stop": {
+      "precision": 0.3333333333333333,
+      "recall": 0.25,
+      "f1-score": 0.2857142857142857,
+      "support": 12.0
+    },
+    "alexa_watch": {
+      "precision": 0.6363636363636364,
+      "recall": 0.5833333333333334,
+      "f1-score": 0.6086956521739131,
+      "support": 12.0
+    },
+    "android_lan_audio": {
+      "precision": 0.358974358974359,
+      "recall": 0.3888888888888889,
+      "f1-score": 0.37333333333333335,
+      "support": 36.0
+    },
+    "android_lan_close": {
+      "precision": 1.0,
+      "recall": 0.8333333333333334,
+      "f1-score": 0.9090909090909091,
+      "support": 6.0
+    },
+    "android_lan_color": {
+      "precision": 0.15555555555555556,
+      "recall": 0.1794871794871795,
+      "f1-score": 0.16666666666666666,
+      "support": 39.0
+    },
+    "android_lan_color2": {
+      "precision": 0.2,
+      "recall": 0.03125,
+      "f1-score": 0.05405405405405406,
+      "support": 32.0
+    },
+    "android_lan_dim": {
+      "precision": 0.17857142857142858,
+      "recall": 0.1282051282051282,
+      "f1-score": 0.14925373134328357,
+      "support": 39.0
+    },
+    "android_lan_dim2": {
+      "precision": 0.2413793103448276,
+      "recall": 0.3333333333333333,
+      "f1-score": 0.28,
+      "support": 42.0
+    },
+    "android_lan_disturb_off": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 6.0
+    },
+    "android_lan_disturb_on": {
+      "precision": 0.5,
+      "recall": 0.2857142857142857,
+      "f1-score": 0.36363636363636365,
+      "support": 7.0
+    },
+    "android_lan_off": {
+      "precision": 0.2774566473988439,
+      "recall": 0.5106382978723404,
+      "f1-score": 0.3595505617977528,
+      "support": 94.0
+    },
+    "android_lan_on": {
+      "precision": 0.40476190476190477,
+      "recall": 0.2073170731707317,
+      "f1-score": 0.27419354838709675,
+      "support": 82.0
+    },
+    "android_lan_photo": {
+      "precision": 0.3333333333333333,
+      "recall": 0.2777777777777778,
+      "f1-score": 0.30303030303030304,
+      "support": 18.0
+    },
+    "android_lan_recording": {
+      "precision": 0.4230769230769231,
+      "recall": 0.55,
+      "f1-score": 0.4782608695652174,
+      "support": 20.0
+    },
+    "android_lan_scene": {
+      "precision": 1.0,
+      "recall": 0.16666666666666666,
+      "f1-score": 0.2857142857142857,
+      "support": 6.0
+    },
+    "android_lan_temp": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "android_lan_temp2": {
+      "precision": 0.16666666666666666,
+      "recall": 0.6,
+      "f1-score": 0.2608695652173913,
+      "support": 5.0
+    },
+    "android_lan_volume": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 4.0
+    },
+    "android_lan_volume2": {
+      "precision": 0.4166666666666667,
+      "recall": 0.8333333333333334,
+      "f1-score": 0.5555555555555556,
+      "support": 6.0
+    },
+    "android_lan_watch": {
+      "precision": 0.30434782608695654,
+      "recall": 0.16279069767441862,
+      "f1-score": 0.21212121212121213,
+      "support": 43.0
+    },
+    "android_wan_audio": {
+      "precision": 0.39655172413793105,
+      "recall": 0.5348837209302325,
+      "f1-score": 0.45544554455445546,
+      "support": 43.0
+    },
+    "android_wan_close": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    },
+    "android_wan_color": {
+      "precision": 0.45,
+      "recall": 0.36,
+      "f1-score": 0.4,
+      "support": 25.0
+    },
+    "android_wan_color2": {
+      "precision": 0.17857142857142858,
+      "recall": 0.2777777777777778,
+      "f1-score": 0.21739130434782608,
+      "support": 18.0
+    },
+    "android_wan_dim": {
+      "precision": 0.16666666666666666,
+      "recall": 0.05555555555555555,
+      "f1-score": 0.08333333333333333,
+      "support": 18.0
+    },
+    "android_wan_dim2": {
+      "precision": 0.3333333333333333,
+      "recall": 0.058823529411764705,
+      "f1-score": 0.1,
+      "support": 17.0
+    },
+    "android_wan_disturb_off": {
+      "precision": 0.2222222222222222,
+      "recall": 0.25,
+      "f1-score": 0.23529411764705882,
+      "support": 8.0
+    },
+    "android_wan_disturb_on": {
+      "precision": 0.2857142857142857,
+      "recall": 0.2857142857142857,
+      "f1-score": 0.2857142857142857,
+      "support": 7.0
+    },
+    "android_wan_off": {
+      "precision": 0.3870967741935484,
+      "recall": 0.5783132530120482,
+      "f1-score": 0.463768115942029,
+      "support": 83.0
+    },
+    "android_wan_on": {
+      "precision": 0.48717948717948717,
+      "recall": 0.25,
+      "f1-score": 0.33043478260869563,
+      "support": 76.0
+    },
+    "android_wan_photo": {
+      "precision": 0.3333333333333333,
+      "recall": 0.18181818181818182,
+      "f1-score": 0.23529411764705882,
+      "support": 22.0
+    },
+    "android_wan_recording": {
+      "precision": 0.4230769230769231,
+      "recall": 0.4782608695652174,
+      "f1-score": 0.4489795918367347,
+      "support": 23.0
+    },
+    "android_wan_scene": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    },
+    "android_wan_temp": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 1.0
+    },
+    "android_wan_temp2": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "android_wan_volume": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 5.0
+    },
+    "android_wan_volume2": {
+      "precision": 0.5,
+      "recall": 0.16666666666666666,
+      "f1-score": 0.25,
+      "support": 6.0
+    },
+    "android_wan_watch": {
+      "precision": 0.5769230769230769,
+      "recall": 0.6521739130434783,
+      "f1-score": 0.6122448979591837,
+      "support": 46.0
+    },
+    "idle": {
+      "precision": 0.5306122448979592,
+      "recall": 0.6842105263157895,
+      "f1-score": 0.5977011494252874,
+      "support": 38.0
+    },
+    "local_voice": {
+      "precision": 0.25,
+      "recall": 0.2,
+      "f1-score": 0.2222222222222222,
+      "support": 10.0
+    },
+    "local_volume": {
+      "precision": 0.47368421052631576,
+      "recall": 0.6923076923076923,
+      "f1-score": 0.5625,
+      "support": 13.0
+    },
+    "ring": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 1.0
+    },
+    "routine": {
+      "precision": 0.2,
+      "recall": 0.16666666666666666,
+      "f1-score": 0.18181818181818182,
+      "support": 12.0
+    },
+    "accuracy": 0.359792924935289,
+    "macro avg": {
+      "precision": 0.326855907395276,
+      "recall": 0.30625739139469194,
+      "f1-score": 0.2953455201192875,
+      "support": 1159.0
+    },
+    "weighted avg": {
+      "precision": 0.36012348702229896,
+      "recall": 0.359792924935289,
+      "f1-score": 0.3401207099348173,
+      "support": 1159.0
+    }
+  }
+}

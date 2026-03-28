@@ -109,4 +109,53 @@ CUDA_VISIBLE_DEVICES=2 python3 fine-tuning/run_classifier.py --vocab_path models
                                    --encoder transformer --mask fully_visible \
                                    --seq_length 320 --learning_rate 6e-5
 ```
+## BehavIoT Multi-Target Fine-Tuning
+
+Fine-tune TrafficFormer on the BehavIoT dataset with 5-fold stratified cross-validation across four classification targets.
+
+**Data source:** `/mnt/data/behavoiot/pcap_vs_label.csv` (7514 samples, 4 label columns)
+
+| Target Column | Classes | Description |
+|---|---|---|
+| `device_type_label` | 10 | Device category (plug, bulb, camera, ...) |
+| `device_label` | 49 | Specific device model |
+| `activity_type_label` | 11 | Activity category (on, off, audio, ...) |
+| `activity_label` | 55 | Specific activity (android_lan_on, alexa_audio, ...) |
+
+### Quick smoke test (2 folds)
+
+```bash
+python3 scripts/run_behaviot.py --config configs/behaviot/smoke.json --target activity_type_label
+```
+
+### Full experiment (5-fold CV, all samples)
+
+```bash
+python3 scripts/run_behaviot.py --config configs/behaviot/full.json --target device_type_label
+python3 scripts/run_behaviot.py --config configs/behaviot/full.json --target device_label
+python3 scripts/run_behaviot.py --config configs/behaviot/full.json --target activity_type_label
+python3 scripts/run_behaviot.py --config configs/behaviot/full.json --target activity_label
+```
+
+### TensorBoard
+
+```bash
+tensorboard --logdir results/behaviot/<target>/<timestamp>/tb_logs
+```
+
+### Output artifacts
+
+Each run creates `results/behaviot/<target>/<timestamp>/` containing:
+
+- `resolved_config.json`, `environment.json` — config and environment
+- `label_to_id.json`, `id_to_label.json` — label mappings
+- `fold_0/` through `fold_4/` — per-fold: `metrics.json`, `confusion_matrix.csv`, `predictions.tsv`, `finetuned_model.bin`
+- `tb_logs/` — TensorBoard logs (train loss, dev/test metrics per fold)
+- `aggregated_metrics.json` — mean +/- std across folds
+- `run.log` — full training output
+
+### Pretrained model
+
+The runner automatically extracts the checkpoint from `/home/shinanliu/pre-trained_model.bin.zip` to `models/pretrained/pre-trained_model.bin` on first use.
+
 Note: this code is based on [ET_BERT](https://github.com/linwhitehat/ET-BERT) and [UER-py](https://github.com/dbiir/UER-py). Many thanks to the authors.

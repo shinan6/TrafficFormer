@@ -254,7 +254,7 @@ def evaluate(args, dataset, print_confusion_matrix=False):
     print("Macro f1: {:.4f}, Micro f1: {:.4f}, Weighted f1: {:.4f}".format(
         f1_score(y_true,y_pred,average='macro'), f1_score(y_true,y_pred,average='micro'), f1_score(y_true,y_pred,average='weighted')))
 
-    return f1_score(y_true,y_pred,average='macro'), confusion
+    return f1_score(y_true,y_pred,average='macro'), confusion, y_true, y_pred
 
 
 def main():
@@ -289,12 +289,24 @@ def main():
     parser.add_argument("--moebert_route_hash_list", default=None, type=str, help="Path of moebert hash list file.")
     parser.add_argument("--moebert_load_balance", type=float, default=0.0, help="gate loss weight.")
     
+    parser.add_argument("--results_dir", type=str, default=None,
+                        help="If set, save metrics/predictions/confusion_matrix to this directory.")
+    parser.add_argument("--id_to_label_path", type=str, default=None,
+                        help="Path to id_to_label.json for human-readable metric names.")
+    parser.add_argument("--tb_log_dir", type=str, default=None,
+                        help="If set, write TensorBoard logs to this directory.")
+
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
 
     set_seed(args.seed)
+
+    tb_writer = None
+    if args.tb_log_dir:
+        from torch.utils.tensorboard import SummaryWriter
+        tb_writer = SummaryWriter(log_dir=args.tb_log_dir)
 
     # Count the number of labels.
     if args.train_path is None:
@@ -366,10 +378,15 @@ def main():
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
                 print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                if tb_writer:
+                    global_step = (epoch - 1) * (instances_num // batch_size) + (i + 1)
+                    tb_writer.add_scalar("train/loss", total_loss / args.report_steps, global_step)
                 total_loss = 0.0
 
-        
+
         result = evaluate(args, read_dataset(args, args.dev_path))
+        if tb_writer:
+            tb_writer.add_scalar("dev/macro_f1", result[0], epoch)
         if result[0] > best_result:
             best_result = result[0]
             best_result_round = epoch
@@ -385,7 +402,36 @@ def main():
             model.module.load_state_dict(torch.load(args.output_model_path))
         else:
             model.load_state_dict(torch.load(args.output_model_path))
-        evaluate(args, read_dataset(args, args.test_path), True)
+        result = evaluate(args, read_dataset(args, args.test_path), True)
+
+        if args.results_dir:
+            from pathlib import Path as _Path
+            from uer.reporting_utils import (
+                compute_metrics, write_metrics_json,
+                write_confusion_matrix_csv, write_predictions_tsv,
+            )
+            rd = _Path(args.results_dir)
+            rd.mkdir(parents=True, exist_ok=True)
+            y_true_list = [int(v) for v in result[2]]
+            y_pred_list = [int(v) for v in result[3]]
+            label_names = [str(i) for i in range(args.labels_num)]
+            if args.id_to_label_path:
+                import json as _json
+                id_to_label = _json.loads(_Path(args.id_to_label_path).read_text())
+                label_names = [id_to_label[str(i)] for i in range(len(id_to_label))]
+            metrics = compute_metrics(y_true_list, y_pred_list, label_names)
+            write_metrics_json(rd / "metrics.json", metrics)
+            write_confusion_matrix_csv(rd / "confusion_matrix.csv",
+                                       y_true_list, y_pred_list, label_names)
+            write_predictions_tsv(rd / "predictions.tsv",
+                                  y_true_list, y_pred_list, label_names)
+            if tb_writer:
+                for key in ["accuracy", "macro_f1", "weighted_f1"]:
+                    tb_writer.add_scalar(f"test/{key}", metrics[key])
+            print(f"Results saved to {rd}")
+
+    if tb_writer:
+        tb_writer.close()
 
 
 if __name__ == "__main__":

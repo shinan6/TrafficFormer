@@ -1,0 +1,20 @@
+{
+    "manifest_csv": "/mnt/data/behavoiot/pcap_vs_label.csv",
+    "n_folds": 2,
+    "results_root": "results/behaviot",
+    "generated_dataset_root": "generated/behaviot",
+    "pretrained_model_zip": "/home/shinanliu/pre-trained_model.bin.zip",
+    "pretrained_model_path": "models/pretrained/pre-trained_model.bin",
+    "vocab_path": "models/encryptd_vocab.txt",
+    "config_path": "models/bert/base_config.json",
+    "payload_length": 64,
+    "start_index": 76,
+    "seq_length": 320,
+    "learning_rate": 6e-5,
+    "batch_size": 64,
+    "epochs_num": 2,
+    "earlystop": 2,
+    "seed": 42,
+    "max_samples_per_class": null,
+    "min_samples_per_class": 5
+}

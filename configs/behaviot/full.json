@@ -11,7 +11,7 @@
     "start_index": 76,
     "seq_length": 320,
     "learning_rate": 6e-5,
-    "batch_size": 128,
+    "batch_size": 64,
     "epochs_num": 4,
     "earlystop": 4,
     "seed": 42,

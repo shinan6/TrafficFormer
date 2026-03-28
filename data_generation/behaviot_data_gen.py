@@ -50,12 +50,36 @@ def _extract_single_pcap(args):
 
     Calls get_feature_flow() with packets_num=999999 so all packets from all
     flows are included. seq_length truncation happens at tokenization time.
+
+    Pre-filters the pcap to remove non-IP packets (e.g., EAPOL) that would
+    crash get_feature_flow's random_ip_port() when it expects IP in the first packet.
     """
     pcap_path, payload_length, start_index = args
     try:
+        import os
+        import sys
+        import tempfile
+        # finetuning_data_gen.py uses `from utils import *` expecting data_generation/ on path
+        data_gen_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+        if data_gen_dir not in sys.path:
+            sys.path.insert(0, data_gen_dir)
+
+        import scapy.all as scapy_mod
+        packets = scapy_mod.rdpcap(pcap_path)
+        ip_packets = scapy_mod.PacketList([p for p in packets if scapy_mod.IP in p])
+        if len(ip_packets) < 3:
+            return pcap_path, None, f"fewer_than_3_ip_packets ({len(ip_packets)})"
+
+        # Write filtered pcap to temp file for get_feature_flow
+        with tempfile.NamedTemporaryFile(suffix=".pcap", delete=False) as tmp:
+            tmp_path = tmp.name
+        scapy_mod.wrpcap(tmp_path, ip_packets)
+
         from data_generation.finetuning_data_gen import get_feature_flow
-        result = get_feature_flow(pcap_path, payload_length, packets_num=999999,
+        result = get_feature_flow(tmp_path, payload_length, packets_num=999999,
                                   start_index=start_index)
+        os.unlink(tmp_path)
+
         if result == -1:
             return pcap_path, None, "extraction_returned_-1"
         return pcap_path, result[0], None
@@ -163,9 +187,16 @@ def build_kfold_splits(rows, target_column, label_to_id, n_folds, seed):
         test_rows = [valid_rows[i] for i in test_idx]
         train_all = [valid_rows[i] for i in train_idx]
         train_labels = [r[target_column] for r in train_all]
-        train_rows, dev_rows = train_test_split(
-            train_all, test_size=0.1, random_state=seed, stratify=train_labels
-        )
+        try:
+            train_rows, dev_rows = train_test_split(
+                train_all, test_size=0.1, random_state=seed, stratify=train_labels
+            )
+        except ValueError:
+            # Stratified inner split infeasible (some classes have too few samples
+            # for 10% dev). Fall back to non-stratified random split.
+            train_rows, dev_rows = train_test_split(
+                train_all, test_size=0.1, random_state=seed
+            )
         folds.append((train_rows, dev_rows, test_rows))
     return folds
 

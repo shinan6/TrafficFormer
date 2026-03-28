@@ -103,14 +103,14 @@ def extract_all_features(manifest_rows, config, cache_dir=None, n_workers=32):
         (features_dict, skipped_list) where features_dict maps pcap_path to
         datagram string and skipped_list contains dicts with pcap_path + reason.
     """
-    # Build a cache key from extraction parameters to detect stale caches
+    # Build a cache key from extraction parameters + manifest content to detect stale caches
     import hashlib
+    pcap_paths = sorted(r["pcap_path"] for r in manifest_rows)
     cache_key = hashlib.md5(json.dumps({
-        "manifest_count": len(manifest_rows),
+        "pcap_paths": pcap_paths,
         "payload_length": config["payload_length"],
         "start_index": config["start_index"],
-        "manifest_csv": config.get("manifest_csv", ""),
-    }, sort_keys=True).encode()).hexdigest()[:12]
+    }, sort_keys=True).encode()).hexdigest()[:16]
 
     if cache_dir:
         cache_dir = Path(cache_dir)

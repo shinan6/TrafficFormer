@@ -162,11 +162,10 @@ def extract_all_features(manifest_rows, config, cache_dir=None, n_workers=32):
         with open(cache_file, "w") as f:
             json.dump(features, f)
         cache_key_file.write_text(cache_key)
-        if skipped:
-            with open(skipped_file, "w", newline="") as f:
-                w = csv.DictWriter(f, fieldnames=["pcap_path", "reason"])
-                w.writeheader()
-                w.writerows(skipped)
+        with open(skipped_file, "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=["pcap_path", "reason"])
+            w.writeheader()
+            w.writerows(skipped)
 
     return features, skipped
 
@@ -178,11 +177,23 @@ def extract_all_features(manifest_rows, config, cache_dir=None, n_workers=32):
 def _validate_split_feasibility(rows, target_column, label_to_id, n_folds):
     """Check that every class has enough samples for the requested fold count."""
     counts = Counter(r[target_column] for r in rows if r[target_column] in label_to_id)
+    if len(counts) < 2:
+        raise ValueError(
+            f"Split infeasible: need at least 2 classes but found {len(counts)}. "
+            f"Check min_samples_per_class filter or manifest content."
+        )
     problems = {label: c for label, c in counts.items() if c < n_folds}
     if problems:
         raise ValueError(
             f"Split infeasible: these classes have fewer samples than n_folds={n_folds}: "
             f"{problems}. Increase min_samples_per_class or reduce n_folds."
+        )
+    total_train = sum(counts.values()) * (n_folds - 1) // n_folds
+    min_dev = max(2, len(counts))
+    if int(total_train * 0.1) < 1:
+        raise ValueError(
+            f"Split infeasible: training set too small for 10% dev split "
+            f"({total_train} samples, {len(counts)} classes)."
         )
 
 
